@@ -14,10 +14,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt update
-        sudo apt install -y git build-essential gcc g++ make \
-		bc bison flex libssl-dev libncurses-dev \
-		python3 python3-distutils rsync device-tree-compiler \
-		gcc-arm-linux-gnueabihf
+        sudo apt install -y git build-essential gcc g++ make bc bison flex libssl-dev libncurses-dev python3 python3-distutils rsync device-tree-compiler gcc-arm-linux-gnueabihf
 
     - name: Download Linux 6.6.21
       run: |
