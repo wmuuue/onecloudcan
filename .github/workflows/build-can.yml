@@ -28,12 +28,14 @@ jobs:
     - name: Prepare kernel
       run: |
         cd linux-6.6.21
-        make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- olddefconfig
+		cp ../config/linux-meson-current.config .config
+		make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- olddefconfig
+		make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- modules_prepare
 
     - name: Build CAN modules
       run: |
         cd linux-6.6.21
-        make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- M=drivers/net/can modules -j$(nproc)
+		make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- M=drivers/net/can modules -j$(nproc)
 
     - name: Collect built CAN modules
       run: |
