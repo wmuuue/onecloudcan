@@ -17,7 +17,7 @@ jobs:
         sudo apt install -y git build-essential gcc g++ make \
         bc bison flex libssl-dev libncurses-dev \
         python3 python3-distutils rsync device-tree-compiler \
-        gcc-arm-linux-gnueabihf
+        gcc-arm-linux-gnueabihf wget
 
     - name: Verify cross compiler
       run: arm-linux-gnueabihf-gcc --version
@@ -31,15 +31,16 @@ jobs:
       run: |
         cp config/linux-meson-current.config linux-6.6.21/.config
 
-    - name: Prepare kernel
+    - name: Prepare and build full kernel
       run: |
         cd linux-6.6.21
+        # 配置内核
         make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- olddefconfig
+        # 编译 vmlinux，生成符号表
+        make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- vmlinux
+        # 生成模块头文件
         make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- modules_prepare
-
-    - name: Build all kernel modules
-      run: |
-        cd linux-6.6.21
+        # 编译所有模块
         make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- modules -j$(nproc)
 
     - name: Collect CAN modules
