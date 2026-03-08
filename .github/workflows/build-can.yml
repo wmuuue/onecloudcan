@@ -1,0 +1,49 @@
+name: Build CAN Modules
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y git build-essential gcc g++ make \
+        bc bison flex libssl-dev libncurses-dev \
+        python3 python3-distutils rsync device-tree-compiler wget
+
+    - name: Download Linux 6.6.21
+      run: |
+        wget https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.6.21.tar.xz
+        tar xf linux-6.6.21.tar.xz
+
+    - name: Copy config
+      run: |
+        cp config/linux-meson-current.config linux-6.6.21/.config
+
+    - name: Prepare kernel
+      run: |
+        cd linux-6.6.21
+        make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- olddefconfig
+
+    - name: Build CAN modules
+      run: |
+        cd linux-6.6.21
+        make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- M=drivers/net/can modules -j$(nproc)
+
+    - name: Collect built CAN modules
+      run: |
+        mkdir -p output
+        find linux-6.6.21/drivers/net/can -name "*.ko" -exec cp {} output/ \;
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: can-modules
+        path: output
